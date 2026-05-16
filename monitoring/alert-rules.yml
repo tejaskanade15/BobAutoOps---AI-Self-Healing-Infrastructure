@@ -1,0 +1,149 @@
+# Prometheus Alert Rules for BobAutoOps
+# These rules detect errors and anomalies in the monitored application
+
+groups:
+  - name: bobautoops_application_alerts
+    interval: 10s  # Evaluate rules every 10 seconds
+    rules:
+      # Alert when any errors occur in the application
+      - alert: ApplicationErrorDetected
+        expr: increase(http_errors_total[1m]) > 0
+        for: 10s
+        labels:
+          severity: critical
+          component: monitored-app
+          alert_type: error_detected
+        annotations:
+          summary: "Application error detected in {{ $labels.service }}"
+          description: "The monitored application has encountered {{ $value }} error(s) in the last minute on route {{ $labels.route }} with error type {{ $labels.error_type }}"
+          error_type: "{{ $labels.error_type }}"
+          route: "{{ $labels.route }}"
+          status_code: "{{ $labels.status_code }}"
+          action: "Trigger self-healing analysis"
+
+      # Alert for high error rate (more than 5 errors per minute)
+      - alert: HighErrorRate
+        expr: rate(http_errors_total[1m]) > 0.08
+        for: 30s
+        labels:
+          severity: critical
+          component: monitored-app
+          alert_type: high_error_rate
+        annotations:
+          summary: "High error rate detected in {{ $labels.service }}"
+          description: "Error rate is {{ $value | humanize }} errors/second on {{ $labels.route }}"
+          threshold: "5 errors per minute"
+          action: "Immediate investigation required"
+
+      # Alert for specific error types - Database errors
+      - alert: DatabaseErrorDetected
+        expr: increase(http_errors_total{error_type="database_error"}[1m]) > 0
+        for: 10s
+        labels:
+          severity: critical
+          component: monitored-app
+          alert_type: database_error
+        annotations:
+          summary: "Database connection error detected"
+          description: "Database connectivity issues detected on {{ $labels.route }}"
+          error_type: "database_error"
+          action: "Check database connection and credentials"
+
+      # Alert for 500 Internal Server Errors
+      - alert: InternalServerError
+        expr: increase(http_errors_total{error_type="internal_server_error"}[1m]) > 0
+        for: 10s
+        labels:
+          severity: critical
+          component: monitored-app
+          alert_type: internal_server_error
+        annotations:
+          summary: "Internal server error detected"
+          description: "500 Internal Server Error on {{ $labels.route }}"
+          error_type: "internal_server_error"
+          action: "Analyze application logs and stack traces"
+
+      # Alert for timeout errors
+      - alert: TimeoutErrorDetected
+        expr: increase(http_errors_total{error_type="timeout_error"}[1m]) > 0
+        for: 10s
+        labels:
+          severity: warning
+          component: monitored-app
+          alert_type: timeout_error
+        annotations:
+          summary: "Request timeout detected"
+          description: "Timeout errors occurring on {{ $labels.route }}"
+          error_type: "timeout_error"
+          action: "Check external service dependencies"
+
+      # Alert for service unavailable (503)
+      - alert: ServiceUnavailable
+        expr: increase(http_errors_total{error_type="service_unavailable"}[1m]) > 0
+        for: 10s
+        labels:
+          severity: critical
+          component: monitored-app
+          alert_type: service_unavailable
+        annotations:
+          summary: "Service unavailable error detected"
+          description: "503 Service Unavailable on {{ $labels.route }}"
+          error_type: "service_unavailable"
+          action: "Check service health and resource availability"
+
+      # Alert when application is down (no metrics received)
+      - alert: ApplicationDown
+        expr: up{job="bobautoops-monitored-app"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          component: monitored-app
+          alert_type: application_down
+        annotations:
+          summary: "Monitored application is down"
+          description: "The monitored application at {{ $labels.instance }} is not responding"
+          action: "Restart application and check logs"
+
+      # Alert for high response time (95th percentile > 2 seconds)
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 2
+        for: 1m
+        labels:
+          severity: warning
+          component: monitored-app
+          alert_type: performance_degradation
+        annotations:
+          summary: "High response time detected"
+          description: "95th percentile response time is {{ $value | humanize }}s"
+          threshold: "2 seconds"
+          action: "Investigate performance bottlenecks"
+
+      # Alert for high memory usage
+      - alert: HighMemoryUsage
+        expr: (process_resident_memory_bytes / 1024 / 1024) > 500
+        for: 2m
+        labels:
+          severity: warning
+          component: monitored-app
+          alert_type: high_memory_usage
+        annotations:
+          summary: "High memory usage detected"
+          description: "Application memory usage is {{ $value | humanize }}MB"
+          threshold: "500MB"
+          action: "Check for memory leaks"
+
+      # Alert when error rate exceeds 10% of total requests
+      - alert: ErrorRateThresholdExceeded
+        expr: (rate(http_errors_total[5m]) / rate(http_requests_total[5m])) > 0.1
+        for: 1m
+        labels:
+          severity: critical
+          component: monitored-app
+          alert_type: error_rate_threshold
+        annotations:
+          summary: "Error rate threshold exceeded"
+          description: "Error rate is {{ $value | humanizePercentage }} of total requests"
+          threshold: "10%"
+          action: "Immediate investigation and potential rollback"
+
+# Made with Bob

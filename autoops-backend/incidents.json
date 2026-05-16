@@ -1,0 +1,87 @@
+[
+  {
+    "id": "1778934013959",
+    "timestamp": "2026-05-16T12:20:13.960Z",
+    "alertName": "HighErrorRate",
+    "severity": "critical",
+    "status": "acknowledged",
+    "service": "monitored-app",
+    "instance": "unknown",
+    "description": "Null pointer exception in /users endpoint at line 47",
+    "summary": "High error rate detected",
+    "job": "unknown",
+    "rootCause": "Null pointer exception in /users endpoint at line 47",
+    "fixSuggestion": "Review the error logs and check the affected service. Consider implementing retry logic or circuit breakers.",
+    "affectedFiles": [
+      "app.js",
+      "config\\index.js",
+      "middleware\\errorHandler.js"
+    ],
+    "confidence": 0.75,
+    "prUrl": null,
+    "postmortemPath": null,
+    "rawAlert": {
+      "receiver": "bob-webhook",
+      "status": "firing",
+      "alerts": [
+        {
+          "status": "firing",
+          "labels": {
+            "alertname": "HighErrorRate",
+            "severity": "critical",
+            "service": "monitored-app"
+          },
+          "annotations": {
+            "summary": "High error rate detected",
+            "description": "Null pointer exception in /users endpoint at line 47"
+          },
+          "startsAt": "2026-05-16T16:00:00Z"
+        }
+      ]
+    },
+    "acknowledgedAt": "2026-05-16T12:21:57.205Z"
+  },
+  {
+    "id": "1778934035791",
+    "timestamp": "2026-05-16T12:20:35.791Z",
+    "alertName": "DatabaseConnectionFailure",
+    "severity": "critical",
+    "status": "acknowledged",
+    "service": "monitored-app",
+    "instance": "localhost:3000",
+    "description": "Connection pool exhausted in database handler. Max retries exceeded at getUsersFromDB() function",
+    "summary": "Database connection failure",
+    "job": "unknown",
+    "rootCause": "Connection pool exhausted in database handler. Max retries exceeded at getUsersFromDB() function",
+    "fixSuggestion": "Review the error logs and check the affected service. Consider implementing retry logic or circuit breakers.",
+    "affectedFiles": [
+      "app.js",
+      "config\\index.js",
+      "middleware\\errorHandler.js"
+    ],
+    "confidence": 0.75,
+    "prUrl": null,
+    "postmortemPath": null,
+    "rawAlert": {
+      "receiver": "bob-webhook",
+      "status": "firing",
+      "alerts": [
+        {
+          "status": "firing",
+          "labels": {
+            "alertname": "DatabaseConnectionFailure",
+            "severity": "critical",
+            "service": "monitored-app",
+            "instance": "localhost:3000"
+          },
+          "annotations": {
+            "summary": "Database connection failure",
+            "description": "Connection pool exhausted in database handler. Max retries exceeded at getUsersFromDB() function"
+          },
+          "startsAt": "2026-05-16T17:30:00Z"
+        }
+      ]
+    },
+    "acknowledgedAt": "2026-05-16T12:21:55.935Z"
+  }
+]

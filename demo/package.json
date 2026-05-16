@@ -1,0 +1,20 @@
+{
+  "name": "bob-autoops-demo",
+  "version": "1.0.0",
+  "description": "Demo scripts for Bob AutoOps incident triggering",
+  "main": "trigger-incident.js",
+  "scripts": {
+    "trigger": "node trigger-incident.js"
+  },
+  "keywords": [
+    "demo",
+    "prometheus",
+    "alertmanager",
+    "incident"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.0"
+  }
+}
