@@ -1,8 +1,10 @@
 # BobAutoOps - AI-Powered Self-Healing Infrastructure
 
-**IBM Bob Hackathon 2026**
+**IBM Bob Hackathon 2026** | Built in 48 hours by Team BobAutoOps
 
-An intelligent infrastructure monitoring and self-healing system that automatically detects errors, analyzes root causes, generates fixes, and creates GitHub pull requests - all powered by AI.
+An intelligent infrastructure monitoring and self-healing system that automatically detects errors, analyzes root causes, generates fixes, and creates GitHub pull requests — all powered by AI.
+
+---
 
 ## 🎯 Project Overview
 
@@ -15,6 +17,8 @@ BobAutoOps is a complete end-to-end solution for automated infrastructure healin
 5. **GitHub Integration** - Automatic PR creation with fixes
 6. **Postmortem Reports** - PDF documentation of incidents
 
+---
+
 ## 🏗️ Architecture
 
 ```
@@ -23,7 +27,7 @@ BobAutoOps is a complete end-to-end solution for automated infrastructure healin
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
 │  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐           │
-│  │  Monitored   │───▶│  Prometheus  │───▶│ Alertmanager │          │
+│  │  Monitored   │──▶│  Prometheus  │───▶│ Alertmanager │           │
 │  │     App      │    │   Scrapes    │    │   Detects    │           │
 │  │   :3000      │    │   Metrics    │    │   Errors     │           │
 │  └──────────────┘    └──────────────┘    └──────┬───────┘           │
@@ -40,12 +44,16 @@ BobAutoOps is a complete end-to-end solution for automated infrastructure healin
 │         │                    │                    │            │    │
 │         │                    ▼                    ▼            ▼    │
 │         │            ┌──────────────┐    ┌──────────────┐  ┌─────┐  │
-│         └──────────▶│  IBM watsonx │    │    GitHub    │  │ PDF │  │
+│         └─────────▶ │  IBM watsonx │    │    GitHub    │  │ PDF │  │
 │                      │  AI Analysis │    │   Auto PR    │  │ Gen │  │
 │                      └──────────────┘    └──────────────┘  └─────┘  │
 │                                                                     │
 └─────────────────────────────────────────────────────────────────────┘
 ```
+
+**Full pipeline:** Error occurs → Prometheus detects → Alertmanager fires webhook → AutoOps backend runs watsonx AI analysis → generates code fix → opens GitHub PR → generates PDF postmortem.
+
+---
 
 ## 📁 Project Structure
 
@@ -59,33 +67,34 @@ bob-autoops/
 │   │   ├── routes/            # API endpoints (/users, /health, /metrics)
 │   │   └── utils/             # Error simulation utilities
 │   ├── index.js               # Application entry point
-│   ├── package.json           # Dependencies
-│   └── README.md              # App documentation
+│   ├── package.json
+│   └── README.md
 │
 ├── monitoring/                 # Prometheus monitoring stack
 │   ├── prometheus.yml         # Prometheus configuration
-│   ├── alert-rules.yml        # Alert rule definitions
+│   ├── alert-rules.yml        # 10 alert rule definitions
 │   ├── alertmanager.yml       # Alertmanager webhook config
-│   ├── docker-compose.yml     # Docker setup for monitoring
-│   └── README.md              # Monitoring documentation
+│   ├── docker-compose.yml     # Docker setup
+│   └── README.md
 │
-├── autoops-backend/           # AI-powered backend (TODO)
+├── autoops-backend/           # AI-powered self-healing backend
 │   ├── src/
 │   │   ├── routes/
-│   │   │   └── alert.js       # Webhook receiver
+│   │   │   └── alert.js       # Webhook receiver from Alertmanager
 │   │   ├── services/
-│   │   │   ├── analyzer.js    # AI root cause analysis
+│   │   │   ├── analyzer.js    # IBM watsonx root cause analysis
 │   │   │   ├── fixer.js       # AI fix generation
 │   │   │   ├── github.js      # GitHub PR creation
-│   │   │   └── postmortem.js  # PDF generation
+│   │   │   └── postmortem.js  # PDF postmortem generation
 │   │   └── app.js
 │   └── package.json
 │
-├── dashboard/                  # Monitoring dashboard (TODO)
-│   └── grafana/               # Grafana dashboards
+├── dashboard/                  # Grafana dashboards (Phase 4)
 │
-└── README.md                  # This file
+└── README.md
 ```
+
+---
 
 ## 🚀 Quick Start
 
@@ -93,96 +102,91 @@ bob-autoops/
 
 - Node.js >= 16.0.0
 - Docker and Docker Compose
-- Git
-- IBM watsonx API access (for AI features)
-- GitHub Personal Access Token (for PR creation)
+- IBM watsonx API access
+- GitHub Personal Access Token
 
 ### 1. Start the Monitored Application
 
 ```bash
-# Navigate to monitored-app
 cd monitored-app
-
-# Install dependencies
 npm install
-
-# Start the application
 npm start
 ```
 
-The app will be available at http://localhost:3000
+App available at http://localhost:3000
 
 ### 2. Start the Monitoring Stack
 
 ```bash
-# Navigate to monitoring directory
 cd monitoring
-
-# Start Prometheus, Alertmanager, and Grafana
 docker-compose up -d
-
-# Verify services are running
 docker-compose ps
 ```
 
-Access the monitoring tools:
 - **Prometheus:** http://localhost:9090
 - **Alertmanager:** http://localhost:9093
 - **Grafana:** http://localhost:3001 (admin/admin)
 
-### 3. Test Error Detection
+### 3. Start the AutoOps Backend
 
 ```bash
-# Trigger an error in the monitored app
+cd autoops-backend
+cp .env.example .env   # fill in your watsonx and GitHub credentials
+npm install
+npm start
+```
+
+Backend available at http://localhost:4000
+
+### 4. Test the Full Pipeline
+
+```bash
+# Trigger a 500 error in the monitored app
 curl "http://localhost:3000/users?errorType=500"
 
-# Wait 10-15 seconds, then check Prometheus alerts
-open http://localhost:9090/alerts
-
-# Check Alertmanager
-open http://localhost:9093
+# Wait ~15 seconds, then check:
+# - Prometheus alerts:   http://localhost:9090/alerts
+# - Alertmanager:        http://localhost:9093
+# - AutoOps incidents:   http://localhost:4000/incidents
+# - Your GitHub repo:    check for a new auto-generated PR
 ```
+
+---
 
 ## 🔧 Features
 
-### ✅ Completed
+### Phase 1 — Monitoring Foundation ✅
 
-#### Monitored Application
-- ✅ Express.js REST API with multiple endpoints
-- ✅ Prometheus metrics integration (prom-client)
-- ✅ Comprehensive error simulation (7 error types)
-- ✅ Health check endpoint
-- ✅ Request/error tracking middleware
-- ✅ Detailed error logging
+- Express.js REST API with 7 error types for simulation
+- Prometheus metrics via `prom-client` (counters, histograms, gauges)
+- 10 comprehensive alert rules (critical + warning)
+- Alertmanager webhook integration
+- Docker Compose deployment
 
-#### Monitoring Stack
-- ✅ Prometheus configuration with 10s scrape interval
-- ✅ 10 comprehensive alert rules
-- ✅ Alertmanager webhook integration
-- ✅ Docker Compose setup for easy deployment
-- ✅ Grafana for visualization (optional)
+### Phase 2 — AI Backend ✅
 
-### ✅ Completed - Phase 2
+- Webhook receiver at `/alert` triggered by Alertmanager
+- IBM watsonx AI integration for root cause analysis
+- Codebase analyzer (reads all source files for context)
+- AI-powered fix generation tailored to the actual codebase
+- Incident management system (create, acknowledge, update)
 
-#### AutoOps Backend
-- [x] Webhook receiver endpoint (/alert)
-- [x] IBM watsonx integration for AI analysis
-- [x] Codebase analyzer (reads all files)
-- [x] Root cause identification
-- [x] AI-powered fix generation
-- [x] GitHub API integration
-- [x] Automatic PR creation
-- [x] PDF postmortem generation (professional reports)
+### Phase 3 — Automation ✅
 
-#### Dashboard
-- [ ] Custom Grafana dashboards
-- [ ] Real-time error visualization
-- [ ] Self-healing activity timeline
-- [ ] PR status tracking
+- GitHub API integration for automatic PR creation
+- PR includes AI-generated fix + detailed description
+- PDF postmortem generation with incident summary
+- Full alert → fix → PR pipeline working end-to-end
+
+### Phase 4 — Dashboard (In Progress)
+
+- Custom Grafana dashboards
+- Real-time self-healing activity timeline
+- PR status tracking
+
+---
 
 ## 📊 Available Metrics
-
-The monitored app exposes these Prometheus metrics:
 
 | Metric | Type | Description |
 |--------|------|-------------|
@@ -190,96 +194,80 @@ The monitored app exposes these Prometheus metrics:
 | `http_request_duration_seconds` | Histogram | Request duration in seconds |
 | `http_errors_total` | Counter | Total errors by type, route, status |
 | `app_info` | Gauge | Application metadata (version, name, env) |
-| `process_*` | Various | Node.js process metrics (CPU, memory, etc.) |
+| `process_*` | Various | Node.js process metrics (CPU, memory) |
+
+---
 
 ## 🚨 Alert Rules
 
-### Critical Alerts (Immediate Action)
+### Critical (Immediate Trigger)
 
-1. **ApplicationErrorDetected** - Any error occurs
-2. **HighErrorRate** - More than 5 errors/minute
-3. **DatabaseErrorDetected** - Database connection issues
-4. **InternalServerError** - 500 errors
-5. **ServiceUnavailable** - 503 errors
-6. **ApplicationDown** - App stops responding
+| Alert | Condition |
+|-------|-----------|
+| ApplicationErrorDetected | Any error occurs |
+| HighErrorRate | > 5 errors/minute |
+| DatabaseErrorDetected | DB connection issues |
+| InternalServerError | 500 errors |
+| ServiceUnavailable | 503 errors |
+| ApplicationDown | App stops responding |
 
-### Warning Alerts (Monitor)
+### Warning (Monitor)
 
-7. **HighResponseTime** - 95th percentile > 2s
-8. **HighMemoryUsage** - Memory > 500MB
-9. **TimeoutErrorDetected** - Request timeouts
-10. **ErrorRateThresholdExceeded** - Error rate > 10%
+| Alert | Condition |
+|-------|-----------|
+| HighResponseTime | 95th percentile > 2s |
+| HighMemoryUsage | Memory > 500MB |
+| TimeoutErrorDetected | Request timeouts |
+| ErrorRateThresholdExceeded | Error rate > 10% |
 
-## 🧪 Testing Error Simulation
+---
 
-The monitored app supports intentional error simulation via query parameters:
+## 🧪 Error Simulation
 
 ```bash
-# 500 Internal Server Error
-curl "http://localhost:3000/users?errorType=500"
-
-# Database Connection Error
-curl "http://localhost:3000/users?errorType=db"
-
-# Timeout Error
-curl "http://localhost:3000/users?errorType=timeout"
-
-# Service Unavailable (503)
-curl "http://localhost:3000/users?errorType=503"
-
-# Not Found (404)
-curl "http://localhost:3000/users?errorType=404"
-
-# Validation Error (400)
-curl "http://localhost:3000/users?errorType=validation"
-
-# Authentication Error (401)
-curl "http://localhost:3000/users?errorType=auth"
+curl "http://localhost:3000/users?errorType=500"       # Internal Server Error
+curl "http://localhost:3000/users?errorType=db"        # Database Error
+curl "http://localhost:3000/users?errorType=timeout"   # Timeout
+curl "http://localhost:3000/users?errorType=503"       # Service Unavailable
+curl "http://localhost:3000/users?errorType=404"       # Not Found
+curl "http://localhost:3000/users?errorType=validation"# Validation Error
+curl "http://localhost:3000/users?errorType=auth"      # Auth Error
 ```
 
-## 📈 Monitoring Workflow
+---
 
-1. **Error Occurs** → User triggers error or real error happens
-2. **Metrics Collected** → Prometheus scrapes `/metrics` endpoint
-3. **Alert Evaluated** → Alert rules check for error conditions
-4. **Alert Fires** → Prometheus sends alert to Alertmanager
-5. **Webhook Sent** → Alertmanager sends webhook to autoops-backend
-6. **AI Analysis** → Backend analyzes codebase and identifies root cause
-7. **Fix Generated** → AI generates code fix
-8. **PR Created** → Automatic GitHub PR with fix
-9. **Postmortem** → PDF report generated
-
-## 🔗 API Endpoints
+## 🔗 API Reference
 
 ### Monitored App (Port 3000)
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/` | GET | Service information |
-| `/health` | GET | Health check with uptime |
+| `/` | GET | Service info |
+| `/health` | GET | Health check + uptime |
 | `/metrics` | GET | Prometheus metrics |
 | `/users` | GET | User list (supports error simulation) |
 | `/users/:id` | GET | Get user by ID |
-| `/users/errors/types` | GET | Available error types |
+| `/users/errors/types` | GET | List available error types |
 
 ### AutoOps Backend (Port 4000)
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/alert` | POST | Webhook receiver from Alertmanager (triggers AI workflow) |
+| `/alert` | POST | Webhook receiver (triggers full AI pipeline) |
 | `/incidents` | GET | List all incidents |
-| `/incidents/:id` | GET | Get specific incident details |
+| `/incidents/:id` | GET | Incident details |
 | `/incidents/:id` | PATCH | Update incident status |
-| `/incidents/:id/acknowledge` | POST | Acknowledge an incident |
-| `/postmortem/:id` | GET | Download PDF postmortem report |
-| `/health` | GET | Health check and service status |
-| `/config` | GET | Configuration status (watsonx, GitHub, etc.) |
+| `/incidents/:id/acknowledge` | POST | Acknowledge incident |
+| `/postmortem/:id` | GET | Download PDF postmortem |
+| `/health` | GET | Service health check |
+| `/config` | GET | Config status (watsonx, GitHub) |
 
-## 🛠️ Development
+---
 
-### Environment Variables
+## ⚙️ Environment Variables
 
-#### Monitored App (.env)
+### Monitored App
+
 ```env
 PORT=3000
 NODE_ENV=development
@@ -288,129 +276,68 @@ APP_VERSION=1.0.0
 LOG_LEVEL=info
 ```
 
-#### AutoOps Backend (.env)
+### AutoOps Backend
+
 ```env
 PORT=4000
 NODE_ENV=development
 
-# IBM watsonx AI (REQUIRED)
-WATSONX_API_KEY=your_watsonx_api_key_here
-WATSONX_PROJECT_ID=your_watsonx_project_id_here
+# IBM watsonx (required)
+WATSONX_API_KEY=your_api_key
+WATSONX_PROJECT_ID=your_project_id
 WATSONX_URL=https://us-south.ml.cloud.ibm.com
 
-# GitHub (REQUIRED for PR automation)
-GITHUB_TOKEN=your_github_personal_access_token_here
+# GitHub (required for PR automation)
+GITHUB_TOKEN=your_personal_access_token
 GITHUB_OWNER=your_github_username
 GITHUB_REPO=your_repository_name
 GITHUB_BRANCH=main
 
-# Monitored Application Path
+# Path to monitored app source
 MONITORED_APP_PATH=../monitored-app/src
 ```
 
-**Setup Instructions:** See [SETUP.md](./SETUP.md) for detailed configuration guide.
+See [SETUP.md](./SETUP.md) for full configuration guide.
 
-### Running in Development
+---
 
+## 🗺️ Roadmap
+
+| Phase | Status | Description |
+|-------|--------|-------------|
+| Phase 1 — Monitoring Foundation | ✅ Complete | Prometheus, Alertmanager, Docker |
+| Phase 2 — AI Backend | ✅ Complete | watsonx integration, incident management |
+| Phase 3 — Automation | ✅ Complete | GitHub PR auto-creation, PDF postmortem |
+| Phase 4 — Dashboard | 🔄 In Progress | Grafana, real-time UI |
+| Phase 5 — Enhancements | 🔜 Planned | Slack notifications, rollback, multi-language |
+
+---
+
+## 🛠️ Troubleshooting
+
+**App won't start**
 ```bash
-# Terminal 1: Monitored App
-cd monitored-app
-npm run dev
-
-# Terminal 2: Monitoring Stack
-cd monitoring
-docker-compose up
-
-# Terminal 3: AutoOps Backend (TODO)
-cd autoops-backend
-npm run dev
+netstat -ano | findstr :3000   # check if port is in use
 ```
 
-## 📚 Documentation
-
-- [Complete Setup Guide](./SETUP.md) - **START HERE**
-- [AutoOps Backend Documentation](./autoops-backend/README.md)
-- [Monitored App Documentation](./monitored-app/README.md)
-- [Monitoring Stack Documentation](./monitoring/README.md)
-
-## 🎓 Learning Resources
-
-- [Prometheus Documentation](https://prometheus.io/docs/)
-- [Alertmanager Configuration](https://prometheus.io/docs/alerting/latest/alertmanager/)
-- [IBM watsonx Documentation](https://www.ibm.com/products/watsonx-ai)
-- [GitHub API Documentation](https://docs.github.com/en/rest)
-
-## 🐛 Troubleshooting
-
-### Monitored App Issues
-
-**Problem:** App won't start
+**Prometheus can't scrape metrics**
 ```bash
-# Check if port 3000 is in use
-netstat -ano | findstr :3000
-
-# Kill the process or change PORT in .env
-```
-
-### Monitoring Issues
-
-**Problem:** Prometheus can't scrape metrics
-```bash
-# Verify metrics endpoint
 curl http://localhost:3000/metrics
-
-# Check Docker network
 docker network inspect monitoring_bobautoops-network
 ```
 
-**Problem:** Alerts not firing
+**Alerts not firing**
 ```bash
-# Check alert rules syntax
 docker-compose exec prometheus promtool check rules /etc/prometheus/alert-rules.yml
-
-# View Prometheus logs
 docker-compose logs prometheus
 ```
 
-## 🎯 Roadmap
-
-### Phase 1: Foundation ✅
-- [x] Monitored application with error simulation
-- [x] Prometheus metrics integration
-- [x] Alert rules configuration
-- [x] Alertmanager webhook setup
-- [x] Docker Compose deployment
-
-### Phase 2: AI Backend ✅ COMPLETE
-- [x] Webhook receiver implementation
-- [x] IBM watsonx integration
-- [x] Codebase analysis engine
-- [x] Root cause identification
-- [x] AI-powered fix generation
-
-### Phase 3: Automation ✅ COMPLETE
-- [x] GitHub API integration
-- [x] Automatic PR creation
-- [x] Postmortem PDF generation
-- [ ] Code review automation (future)
-- [ ] Notification system (future)
-
-### Phase 4: Dashboard 📊
-- [ ] Custom Grafana dashboards
-- [ ] Real-time monitoring UI
-- [ ] Self-healing activity log
-- [ ] Performance analytics
-
-### Phase 5: Enhancement 🚀
-- [ ] Multi-language support
-- [ ] Advanced AI models
-- [ ] Rollback capabilities
-- [ ] A/B testing integration
-- [ ] Slack/Teams notifications
+---
 
 ## 👥 Team
 
-BobAutoOps Team - IBM Bob Hackathon 2026
+**BobAutoOps** — IBM Bob Hackathon 2026 (lablab.ai)  
+Certificate ID: `CMQAZMJC703BPS601RWEO5HTT`
 
 ## 📝 License
 
@@ -418,25 +345,6 @@ MIT License
 
 ## 🙏 Acknowledgments
 
-- IBM watsonx for AI capabilities
-- Prometheus community for monitoring tools
-- Express.js for the web framework
-- Docker for containerization
-
----
-
-**Built for the IBM Bob Hackathon 2026** 🚀
-
-**Status:** Phase 1 Complete ✅ | Phase 2 Complete ✅ | Phase 3 Complete ✅
-
-## 🎉 All Core Features Implemented!
-
-The project now includes:
-- ✅ Real IBM watsonx AI integration for root cause analysis
-- ✅ AI-powered automatic fix generation
-- ✅ GitHub PR automation with detailed descriptions
-- ✅ Professional PDF postmortem reports
-- ✅ Complete incident management system
-- ✅ Full monitoring stack with Prometheus & Alertmanager
-
-**Ready for production use!** See [SETUP.md](./SETUP.md) for configuration instructions.
+- [IBM watsonx](https://www.ibm.com/products/watsonx-ai) for AI capabilities
+- [Prometheus](https://prometheus.io) for monitoring
+- [lablab.ai](https://lablab.ai) for organizing IBM Bob Hackathon 2026
